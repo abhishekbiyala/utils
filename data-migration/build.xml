@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="db-migration" basedir=".">
+	<property file="${basedir}/build.properties" />
+	<property name="lib.dir" value="${basedir}/lib" />
+
+	<path id="tool.classpath">
+		<fileset dir="${lib.dir}">
+			<include name="*.jar" />
+		</fileset>
+		<pathelement location="${basedir}" />
+	</path>
+
+	<taskdef name="dbunit" classname="org.dbunit.ant.DbUnitTask"
+		classpathref="tool.classpath" />
+
+	<target name="export.sourcedb">
+		<dbunit driver="${sourcedb.driver}" url="${sourcedb.url}"
+			userid="${sourcedb.user}" password="${sourcedb.password}">
+			<dbconfig>
+				<property name="datatypeFactory" value="${sourcedb.datatypeFactory}" />
+			</dbconfig>
+
+			<export dest="${basedir}/dataexport.xml">
+				<!-- By default all tables will be exported -->
+				<!-- List tables here in case of selective export, which is usually the case -->
+				<!-- <table name="" /> -->
+				<!-- <table name="" /> -->
+			</export>
+		</dbunit>
+	</target>
+
+	<target name="import.targetdb">
+		<dbunit driver="${targetdb.driver}" url="${targetdb.url}"
+			userid="${targetdb.user}" password="${targetdb.password}">
+			<dbconfig>
+				<property name="datatypeFactory" value="targetdb.datatypeFactory" />
+				<property name="batchedStatements" value="true" />
+				<property name="batchSize" value="500" />
+			</dbconfig>
+			<operation type="REFRESH" transaction="false"
+				src="${basedir}/dataexport.xml" />
+		</dbunit>
+	</target>
+</project>
